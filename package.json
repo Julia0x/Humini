@@ -1,0 +1,20 @@
+{
+  "name": "minecraft-bot",
+  "version": "1.0.0",
+  "description": "Advanced Minecraft bot with combat and auto-eat features",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "mineflayer": "^4.20.1",
+    "mineflayer-armor-manager": "^2.0.1",
+    "mineflayer-auto-eat": "^4.0.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "mineflayer-pvp": "^1.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
