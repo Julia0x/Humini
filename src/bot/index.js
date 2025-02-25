@@ -21,10 +21,10 @@ class MinecraftBot {
 
   initialize() {
     Logger.log('Initializing Humini bot...', 'info');
-    
-    const username = usernameManager.getRandomUsername();
-    Logger.log(`Connecting with username: ${username}`, 'info');
-    
+
+    const username = usernameManager.getUsername(this.config);
+    Logger.log(`Connecting with username: ${username}${this.config.bot.useRandomUsername ? ' (random)' : ' (fixed)'}`, 'info');
+
     this.bot = mineflayer.createBot({
       host: this.config.bot.host,
       port: this.config.bot.port,
@@ -70,7 +70,7 @@ class MinecraftBot {
 
     this.bot.on('end', (reason) => {
       let disconnectReason = 'Unknown reason';
-      
+
       // Parse common disconnect reasons
       if (typeof reason === 'string') {
         disconnectReason = reason;
@@ -131,12 +131,17 @@ class MinecraftBot {
 
   initializeModules() {
     Logger.log('Initializing modules...', 'info');
+
+    // Initialize command manager first
+    this.bot.commandManager = setupCommands(this.bot);
+
+    // Then initialize other modules that depend on commands
     this.bot.combatManager = setupCombat(this.bot, this.config);
     this.bot.autoEatManager = setupAutoEat(this.bot, this.config);
     this.bot.antiAFKManager = setupAntiAFK(this.bot, this.config);
     this.bot.movementManager = setupMovement(this.bot, this.config);
     this.bot.miningManager = setupMining(this.bot, this.config);
-    this.bot.commandManager = setupCommands(this.bot);
+
     Logger.log('All modules initialized successfully', 'success');
   }
 }

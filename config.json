@@ -2,8 +2,9 @@
   "bot": {
     "host": "mc.cwresports.lk",
     "port": 25565,
-    "username": "Vex99",
-    "version": "1.20.1"
+    "username": "Zyren",
+    "version": "1.20.1",
+    "useRandomUsername": true
   },
   "combat": {
     "attackInterval": 1200,
@@ -33,88 +34,136 @@
       "jump": true,
       "rotate": true,
       "walk": true,
-      "swing": true
+      "swing": true,
+      "sneak": true,
+      "inventory": true,
+      "chat": true
     },
-    "walkDistance": 1,
-    "rotationAngle": 45
-  },
-  "woodcutting": {
-    "enabled": true,
-    "maxDistance": 32,
-    "pickupItems": true,
-    "replantSaplings": true,
-    "logTypes": [
-      "oak_log",
-      "spruce_log",
-      "birch_log",
-      "jungle_log",
-      "acacia_log",
-      "dark_oak_log"
-    ]
+    "walkDistance": 3,
+    "rotationAngle": 45,
+    "sneakDuration": 1500,
+    "chatMessages": [
+      "/spawn",
+      "/home",
+      "/tpa",
+      "/back",
+      "/help"
+    ],
+    "chatInterval": 300000,
+    "inventoryDuration": 2000,
+    "naturalDelay": {
+      "min": 500,
+      "max": 2000
+    }
   },
   "mining": {
     "enabled": true,
     "maxDistance": 32,
     "pickupItems": true,
-    "tunnelLength": 32,
-    "tunnelHeight": 2,
-    "tunnelWidth": 1,
-    "targetBlocks": [
-      "diamond_ore",
-      "iron_ore",
-      "gold_ore",
-      "coal_ore",
-      "redstone_ore",
-      "lapis_ore",
-      "emerald_ore",
-      "copper_ore",
-      "ancient_debris"
-    ]
-  },
-  "fishing": {
-    "enabled": true,
-    "autoRecast": true,
-    "recastDelay": 2000,
-    "maxDistance": 3,
-    "treasureOnly": false
-  },
-  "farming": {
-    "enabled": true,
-    "maxDistance": 32,
-    "autoReplant": true,
-    "crops": [
-      "wheat",
-      "carrots",
-      "potatoes",
-      "beetroots",
-      "pumpkin",
-      "melon"
-    ],
-    "bonemealEnabled": true
-  },
-  "inventory": {
-    "autoSort": true,
-    "keepItems": {
-      "tools": true,
-      "weapons": true,
-      "armor": true,
-      "food": true
+    "scanRadius": {
+      "horizontal": 5,
+      "vertical": 3
     },
-    "dropJunk": true,
-    "junkItems": [
-      "rotten_flesh",
-      "spider_eye",
-      "string",
-      "gunpowder"
-    ],
-    "minFreeSlots": 5
+    "tunnelSystem": {
+      "enabled": true,
+      "mainTunnel": {
+        "length": 32,
+        "height": 2,
+        "width": 3,
+        "spacing": 3
+      },
+      "branches": {
+        "enabled": true,
+        "length": 16,
+        "spacing": 3,
+        "perLayer": 4
+      },
+      "layers": {
+        "enabled": true,
+        "spacing": 3,
+        "startY": 11
+      }
+    },
+    "orePriority": {
+      "ancient_debris": 10,
+      "diamond_ore": 9,
+      "emerald_ore": 8,
+      "gold_ore": 7,
+      "iron_ore": 6,
+      "copper_ore": 5,
+      "redstone_ore": 4,
+      "lapis_ore": 3,
+      "coal_ore": 2,
+      "nether_gold_ore": 6,
+      "deepslate_diamond_ore": 9,
+      "deepslate_iron_ore": 6,
+      "deepslate_gold_ore": 7,
+      "deepslate_copper_ore": 5,
+      "deepslate_redstone_ore": 4,
+      "deepslate_lapis_ore": 3,
+      "deepslate_coal_ore": 2
+    },
+    "chestManagement": {
+      "enabled": true,
+      "depositInterval": 300000,
+      "minFreeSlots": 5,
+      "chestLocations": []
+    },
+    "liquidHandling": {
+      "enabled": true,
+      "avoidLava": true,
+      "placeCobblestone": true,
+      "placeWaterBuckets": true,
+      "safetyBlocks": ["cobblestone", "stone", "netherrack"]
+    },
+    "efficiency": {
+      "enabled": true,
+      "trackStats": true,
+      "oresPerHour": true,
+      "blocksPerMinute": true,
+      "toolDurability": true,
+      "energyUsage": true
+    },
+    "caveExploration": {
+      "enabled": true,
+      "maxDistance": 48,
+      "lightThreshold": 7,
+      "avoidMobs": true,
+      "markExplored": true
+    },
+    "inventory": {
+      "keepItems": [
+        "diamond_pickaxe",
+        "netherite_pickaxe",
+        "iron_pickaxe",
+        "water_bucket",
+        "cobblestone",
+        "torch"
+      ],
+      "dropJunk": true,
+      "junkBlocks": [
+        "dirt",
+        "gravel",
+        "diorite",
+        "granite",
+        "andesite",
+        "tuff"
+      ]
+    },
+    "pathfinding": {
+      "enabled": true,
+      "timeout": 5000,
+      "allowDiagonals": true,
+      "maxDropDown": 4,
+      "maxJumpUp": 2,
+      "avoidDanger": true
+    }
   },
   "customCommands": {
     "rg": "/register sad321 sad321",
     "lg": "/login sad321",
     "ls": "/lifesteal",
-    "jt": "/team join Core",
-    "dp": "/team deposit 1000",
-    "leave": "/team leave"
+    "tpa": "/tpa Zyren",
+    "gg": "Good game everyone!"
   }
 }

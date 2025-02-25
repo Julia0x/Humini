@@ -174,7 +174,11 @@ class UsernameManager {
     return array[Math.floor(Math.random() * array.length)];
   }
 
-  getRandomUsername() {
+  getUsername(config) {
+    if (!config.bot.useRandomUsername) {
+      return config.bot.username;
+    }
+
     let attempts = 0;
     const maxAttempts = 100;
     
