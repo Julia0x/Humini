@@ -1,3 +1,5 @@
+import Logger from '../utils/logger.js';
+
 class AutoEatManager {
   constructor(bot, config) {
     this.bot = bot;
@@ -17,12 +19,12 @@ class AutoEatManager {
   setupEventHandlers() {
     this.bot.on('health', () => this.checkFood());
     this.bot.on('autoeat_started', () => {
-      console.log('Started eating');
+      Logger.log('Started eating', 'info');
       this.isEating = true;
     });
 
     this.bot.on('autoeat_stopped', () => {
-      console.log('Stopped eating');
+      Logger.log('Stopped eating', 'info');
       this.isEating = false;
       this.startCooldown();
     });
@@ -43,7 +45,7 @@ class AutoEatManager {
   }
 
   startEating() {
-    this.bot.chat('Getting hungry, time to eat!');
+    Logger.log('Getting hungry, time to eat!', 'info');
     this.bot.autoEat.enable();
   }
 
@@ -55,10 +57,8 @@ class AutoEatManager {
   }
 }
 
-function setupAutoEat(bot, config) {
+export function setupAutoEat(bot, config) {
   const autoEatManager = new AutoEatManager(bot, config);
   autoEatManager.initialize();
   return autoEatManager;
 }
-
-module.exports = { setupAutoEat };

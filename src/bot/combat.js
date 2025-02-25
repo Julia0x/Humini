@@ -1,4 +1,7 @@
-const { Movements, goals } = require('mineflayer-pathfinder');
+import pkg from 'mineflayer-pathfinder';
+import Logger from '../utils/logger.js';
+
+const { Movements, goals } = pkg;
 const { GoalFollow } = goals;
 
 class CombatManager {
@@ -16,7 +19,7 @@ class CombatManager {
     
     this.isAttacking = true;
     this.killAuraInterval = setInterval(() => this.performAttack(), this.config.combat.attackInterval);
-    this.bot.chat('Combat mode activated!');
+    Logger.log('Combat mode activated!', 'combat');
   }
 
   stopAttack() {
@@ -25,7 +28,7 @@ class CombatManager {
     clearInterval(this.killAuraInterval);
     this.killAuraInterval = null;
     this.isAttacking = false;
-    this.bot.chat('Combat mode deactivated!');
+    Logger.log('Combat mode deactivated!', 'combat');
   }
 
   toggleKillAura() {
@@ -45,7 +48,7 @@ class CombatManager {
       this.rotateAndAttack();
     }, this.config.combat.killAura.rotationSpeed);
     
-    this.bot.chat('Kill Aura activated!');
+    Logger.log('Kill Aura activated!', 'combat');
   }
 
   stopKillAura() {
@@ -54,7 +57,7 @@ class CombatManager {
     clearInterval(this.killAuraInterval);
     this.killAuraInterval = null;
     this.isAttacking = false;
-    this.bot.chat('Kill Aura deactivated!');
+    Logger.log('Kill Aura deactivated!', 'combat');
   }
 
   rotateAndAttack() {
@@ -133,9 +136,7 @@ class CombatManager {
   }
 }
 
-function setupCombat(bot, config) {
+export function setupCombat(bot, config) {
   const combatManager = new CombatManager(bot, config);
   return combatManager;
 }
-
-module.exports = { setupCombat };

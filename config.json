@@ -2,7 +2,7 @@
   "bot": {
     "host": "mc.cwresports.lk",
     "port": 25565,
-    "username": "ThisisnotanAlt",
+    "username": "Vex99",
     "version": "1.20.1"
   },
   "combat": {
@@ -37,5 +37,84 @@
     },
     "walkDistance": 1,
     "rotationAngle": 45
+  },
+  "woodcutting": {
+    "enabled": true,
+    "maxDistance": 32,
+    "pickupItems": true,
+    "replantSaplings": true,
+    "logTypes": [
+      "oak_log",
+      "spruce_log",
+      "birch_log",
+      "jungle_log",
+      "acacia_log",
+      "dark_oak_log"
+    ]
+  },
+  "mining": {
+    "enabled": true,
+    "maxDistance": 32,
+    "pickupItems": true,
+    "tunnelLength": 32,
+    "tunnelHeight": 2,
+    "tunnelWidth": 1,
+    "targetBlocks": [
+      "diamond_ore",
+      "iron_ore",
+      "gold_ore",
+      "coal_ore",
+      "redstone_ore",
+      "lapis_ore",
+      "emerald_ore",
+      "copper_ore",
+      "ancient_debris"
+    ]
+  },
+  "fishing": {
+    "enabled": true,
+    "autoRecast": true,
+    "recastDelay": 2000,
+    "maxDistance": 3,
+    "treasureOnly": false
+  },
+  "farming": {
+    "enabled": true,
+    "maxDistance": 32,
+    "autoReplant": true,
+    "crops": [
+      "wheat",
+      "carrots",
+      "potatoes",
+      "beetroots",
+      "pumpkin",
+      "melon"
+    ],
+    "bonemealEnabled": true
+  },
+  "inventory": {
+    "autoSort": true,
+    "keepItems": {
+      "tools": true,
+      "weapons": true,
+      "armor": true,
+      "food": true
+    },
+    "dropJunk": true,
+    "junkItems": [
+      "rotten_flesh",
+      "spider_eye",
+      "string",
+      "gunpowder"
+    ],
+    "minFreeSlots": 5
+  },
+  "customCommands": {
+    "rg": "/register sad321 sad321",
+    "lg": "/login sad321",
+    "ls": "/lifesteal",
+    "jt": "/team join Core",
+    "dp": "/team deposit 1000",
+    "leave": "/team leave"
   }
 }

@@ -1,3 +1,5 @@
+import Logger from '../utils/logger.js';
+
 class AntiAFKManager {
   constructor(bot, config) {
     this.bot = bot;
@@ -19,7 +21,7 @@ class AntiAFKManager {
 
     this.config.antiAfk.enabled = true;
     this.interval = setInterval(() => this.performAction(), this.config.antiAfk.interval);
-    this.bot.chat('Anti-AFK mode activated!');
+    Logger.log('Anti-AFK mode activated!', 'movement');
   }
 
   stop() {
@@ -28,7 +30,7 @@ class AntiAFKManager {
     this.config.antiAfk.enabled = false;
     clearInterval(this.interval);
     this.interval = null;
-    this.bot.chat('Anti-AFK mode deactivated!');
+    Logger.log('Anti-AFK mode deactivated!', 'movement');
   }
 
   async performAction() {
@@ -84,9 +86,7 @@ class AntiAFKManager {
   }
 }
 
-function setupAntiAFK(bot, config) {
+export function setupAntiAFK(bot, config) {
   const antiAFKManager = new AntiAFKManager(bot, config);
   return antiAFKManager;
 }
-
-module.exports = { setupAntiAFK };

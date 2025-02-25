@@ -1,4 +1,4 @@
-const MinecraftBot = require('./src/bot');
+import MinecraftBot from './src/bot/index.js';
 
 try {
   const bot = new MinecraftBot();

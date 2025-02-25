@@ -1,4 +1,5 @@
-const readline = require('readline');
+import readline from 'readline';
+import Logger from '../utils/logger.js';
 
 class CommandManager {
   constructor(bot) {
@@ -10,34 +11,189 @@ class CommandManager {
 
   setupCommands() {
     this.commands.set('chat', (args) => {
-      const message = args.join(' ');
-      this.bot.chat(message);
+      if (!this.bot.entity) {
+        Logger.log('Cannot send chat message - bot not spawned yet', 'error');
+        return;
+      }
+      try {
+        const message = args.join(' ');
+        this.bot.chat(message);
+        Logger.log(`Chat message sent: ${message}`, 'info');
+      } catch (error) {
+        Logger.log(`Failed to send chat message: ${error.message}`, 'error');
+      }
     });
 
     this.commands.set('stats', () => this.printStats());
     this.commands.set('armor', () => this.printArmorStats());
-    this.commands.set('autoEquipArmor', () => this.bot.armorManager.equipAll());
+    this.commands.set('autoEquipArmor', () => {
+      if (!this.bot.entity) {
+        Logger.log('Cannot equip armor - bot not spawned yet', 'error');
+        return;
+      }
+      try {
+        this.bot.armorManager.equipAll();
+        Logger.log('Auto-equipped best armor', 'success');
+      } catch (error) {
+        Logger.log(`Failed to equip armor: ${error.message}`, 'error');
+      }
+    });
     
-    // New commands for Kill Aura and Anti-AFK
     this.commands.set('killaura', (args) => {
+      if (!this.bot.entity) {
+        Logger.log('Cannot toggle Kill Aura - bot not spawned yet', 'error');
+        return;
+      }
       const subCommand = args[0];
       if (subCommand === 'toggle') {
         this.bot.combatManager.toggleKillAura();
-        console.log(`Kill Aura ${this.bot.config.combat.killAura.enabled ? 'enabled' : 'disabled'}`);
+        Logger.log(
+          `Kill Aura ${this.bot.config.combat.killAura.enabled ? 'enabled' : 'disabled'}`,
+          'combat'
+        );
       } else {
-        console.log('Usage: killaura toggle');
+        Logger.log('Usage: killaura toggle', 'warning');
       }
     });
 
     this.commands.set('antiafk', (args) => {
+      if (!this.bot.entity) {
+        Logger.log('Cannot toggle Anti-AFK - bot not spawned yet', 'error');
+        return;
+      }
       const subCommand = args[0];
       if (subCommand === 'toggle') {
         this.bot.antiAFKManager.toggle();
-        console.log(`Anti-AFK ${this.bot.config.antiAfk.enabled ? 'enabled' : 'disabled'}`);
+        Logger.log(
+          `Anti-AFK ${this.bot.config.antiAfk.enabled ? 'enabled' : 'disabled'}`,
+          'movement'
+        );
       } else {
-        console.log('Usage: antiafk toggle');
+        Logger.log('Usage: antiafk toggle', 'warning');
       }
     });
+
+    this.commands.set('follow', (args) => {
+      if (!this.bot.entity) {
+        Logger.log('Cannot follow player - bot not spawned yet', 'error');
+        return;
+      }
+      if (args.length === 0) {
+        Logger.log('Usage: follow <player_name> OR follow stop', 'warning');
+        return;
+      }
+
+      const subCommand = args[0].toLowerCase();
+      
+      if (subCommand === 'stop') {
+        this.bot.movementManager.stopFollowing();
+        Logger.log('Stopped following player', 'movement');
+        return;
+      }
+
+      const playerName = args[0];
+      const player = this.bot.players[playerName]?.entity;
+      
+      if (!player) {
+        Logger.log(`Player ${playerName} not found`, 'error');
+        return;
+      }
+
+      this.bot.movementManager.followPlayer(player);
+      Logger.log(`Now following player: ${playerName}`, 'movement');
+    });
+
+    this.commands.set('inventory', (args) => {
+      if (!this.bot.entity) {
+        Logger.log('Cannot manage inventory - bot not spawned yet', 'error');
+        return;
+      }
+      const subCommand = args[0]?.toLowerCase();
+      if (subCommand === 'sort') {
+        this.bot.inventoryManager.sortInventory();
+      } else if (subCommand === 'clean') {
+        this.bot.inventoryManager.cleanInventory(this.bot.inventory.items());
+      } else if (subCommand === 'dropall') {
+        this.dropAllItems();
+      } else {
+        Logger.log('Usage: inventory sort|clean|dropall', 'warning');
+      }
+    });
+
+    // Add custom commands from config
+    if (this.bot.config.customCommands) {
+      Object.entries(this.bot.config.customCommands).forEach(([cmd, message]) => {
+        this.commands.set(cmd, () => {
+          if (!this.bot.entity) {
+            Logger.log('Cannot send custom message - bot not spawned yet', 'error');
+            return;
+          }
+          try {
+            this.bot.chat(message);
+            Logger.log(`Custom command executed: ${cmd} -> ${message}`, 'info');
+          } catch (error) {
+            Logger.log(`Failed to execute custom command: ${error.message}`, 'error');
+          }
+        });
+      });
+    }
+
+    this.commands.set('help', () => {
+      Logger.divider();
+      Logger.log('Available Commands:', 'info');
+      const standardCommands = {
+        'chat <message>': 'Send a chat message',
+        'stats': 'Show bot statistics',
+        'armor': 'Show armor status',
+        'autoEquipArmor': 'Automatically equip best armor',
+        'killaura toggle': 'Toggle Kill Aura mode',
+        'antiafk toggle': 'Toggle Anti-AFK mode',
+        'follow <player>': 'Follow a specific player',
+        'follow stop': 'Stop following player',
+        'inventory sort': 'Sort inventory items',
+        'inventory clean': 'Clean junk from inventory',
+        'inventory dropall': 'Drop all items from inventory'
+      };
+
+      // Add custom commands to help
+      const customCommands = {};
+      if (this.bot.config.customCommands) {
+        Object.keys(this.bot.config.customCommands).forEach(cmd => {
+          customCommands[cmd] = `Custom chat command: "${this.bot.config.customCommands[cmd]}"`;
+        });
+      }
+
+      Logger.table(standardCommands, 'Standard Commands');
+      if (Object.keys(customCommands).length > 0) {
+        Logger.table(customCommands, 'Custom Commands');
+      }
+      Logger.divider();
+    });
+  }
+
+  async dropAllItems() {
+    if (!this.bot.entity) {
+      Logger.log('Cannot drop items - bot not spawned yet', 'error');
+      return;
+    }
+    const items = this.bot.inventory.items();
+    if (items.length === 0) {
+      Logger.log('Inventory is already empty', 'info');
+      return;
+    }
+
+    Logger.log(`Dropping ${items.length} items...`, 'info');
+    
+    for (const item of items) {
+      try {
+        await this.bot.tossStack(item);
+        Logger.log(`Dropped ${item.name} x${item.count}`, 'info');
+      } catch (error) {
+        Logger.log(`Failed to drop ${item.name}: ${error.message}`, 'error');
+      }
+    }
+
+    Logger.log('Finished dropping all items', 'success');
   }
 
   setupConsoleInput() {
@@ -54,47 +210,65 @@ class CommandManager {
     const handler = this.commands.get(command);
 
     if (handler) {
-      handler(args);
+      try {
+        handler(args);
+      } catch (error) {
+        Logger.log(`Error executing command: ${error.message}`, 'error');
+      }
     } else {
-      console.log(`Unknown command: ${command}`);
+      Logger.log(`Unknown command: ${command}. Type 'help' for available commands.`, 'error');
     }
   }
 
   printStats() {
+    if (!this.bot.entity) {
+      Logger.log('Cannot show stats - bot not spawned yet', 'error');
+      return;
+    }
     const stats = {
-      health: this.bot.health,
-      food: this.bot.food,
-      position: this.bot.entity.position,
-      inventory: this.bot.inventory.items().map(item => `${item.name} x${item.count}`),
+      Health: `${this.bot.health}/20`,
+      Food: `${this.bot.food}/20`,
+      Position: `X: ${Math.round(this.bot.entity.position.x)} Y: ${Math.round(this.bot.entity.position.y)} Z: ${Math.round(this.bot.entity.position.z)}`,
       'Kill Aura': this.bot.config.combat.killAura.enabled ? 'Enabled' : 'Disabled',
-      'Anti-AFK': this.bot.config.antiAfk.enabled ? 'Enabled' : 'Disabled'
+      'Anti-AFK': this.bot.config.antiAfk.enabled ? 'Enabled' : 'Disabled',
+      'Following': this.bot.movementManager.followingPlayer ? this.bot.movementManager.followingPlayer.username : 'No one'
     };
 
-    console.log('Player Stats:');
-    Object.entries(stats).forEach(([key, value]) => {
-      console.log(`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`);
-    });
+    Logger.divider();
+    Logger.table(stats, 'Bot Statistics');
+    
+    const inventory = this.bot.inventory.items().map(item => ({
+      Name: item.name,
+      Count: item.count
+    }));
+    
+    if (inventory.length > 0) {
+      Logger.table(inventory, 'Inventory');
+    } else {
+      Logger.log('Inventory is empty', 'info');
+    }
+    Logger.divider();
   }
 
   printArmorStats() {
+    if (!this.bot.entity) {
+      Logger.log('Cannot show armor stats - bot not spawned yet', 'error');
+      return;
+    }
     const armorSlots = {
-      helmet: 5,
-      chestplate: 6,
-      leggings: 7,
-      boots: 8
+      Helmet: this.bot.inventory.slots[5]?.name || 'None',
+      Chestplate: this.bot.inventory.slots[6]?.name || 'None',
+      Leggings: this.bot.inventory.slots[7]?.name || 'None',
+      Boots: this.bot.inventory.slots[8]?.name || 'None'
     };
 
-    console.log('Armor Stats:');
-    Object.entries(armorSlots).forEach(([piece, slot]) => {
-      const item = this.bot.inventory.slots[slot];
-      console.log(`${piece.charAt(0).toUpperCase() + piece.slice(1)}: ${item ? item.name : 'None'}`);
-    });
+    Logger.divider();
+    Logger.table(armorSlots, 'Armor Status');
+    Logger.divider();
   }
 }
 
-function setupCommands(bot) {
+export function setupCommands(bot) {
   const commandManager = new CommandManager(bot);
   return commandManager;
 }
-
-module.exports = { setupCommands };

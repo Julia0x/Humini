@@ -1,29 +1,37 @@
-const mineflayer = require('mineflayer');
-const { pathfinder } = require('mineflayer-pathfinder');
-const armorManager = require('mineflayer-armor-manager');
-const { loadConfig } = require('../utils/config');
-const { setupCombat } = require('./combat');
-const { setupAutoEat } = require('./eating');
-const { setupCommands } = require('./commands');
-const { setupAntiAFK } = require('./antiafk');
+import mineflayer from 'mineflayer';
+import { pathfinder } from 'mineflayer-pathfinder';
+import armorManager from 'mineflayer-armor-manager';
+import { loadConfig } from '../utils/config.js';
+import { setupCombat } from './combat.js';
+import { setupAutoEat } from './eating.js';
+import { setupCommands } from './commands.js';
+import { setupAntiAFK } from './antiafk.js';
+import { setupMovement } from './movement.js';
+import Logger from '../utils/logger.js';
+import { usernameManager } from '../utils/username.js';
 
 class MinecraftBot {
   constructor() {
     this.config = loadConfig();
     this.bot = null;
+    Logger.showBanner();
     this.initialize();
   }
 
   initialize() {
+    Logger.log('Initializing Humini bot...', 'info');
+    
+    const username = usernameManager.getRandomUsername();
+    Logger.log(`Connecting with username: ${username}`, 'info');
+    
     this.bot = mineflayer.createBot({
       host: this.config.bot.host,
       port: this.config.bot.port,
-      username: this.config.bot.username,
+      username: username,
       version: this.config.bot.version,
       auth: 'offline'
     });
 
-    // Attach config to bot instance for easy access
     this.bot.config = this.config;
 
     this.loadPlugins();
@@ -32,34 +40,57 @@ class MinecraftBot {
   }
 
   loadPlugins() {
+    Logger.log('Loading plugins...', 'info');
     this.bot.loadPlugin(pathfinder);
     this.bot.loadPlugin(armorManager);
     import('mineflayer-auto-eat').then(({ plugin }) => {
       this.bot.loadPlugin(plugin);
+      Logger.log('Auto-eat plugin loaded', 'success');
     });
   }
 
   setupEventHandlers() {
     this.bot.on('spawn', () => {
-      console.log('Bot spawned in the world');
+      Logger.log('Bot spawned in the world', 'success');
+      Logger.log('Type "help" for available commands', 'info');
     });
 
     this.bot.on('error', (err) => {
-      console.error('Bot error:', err);
+      Logger.log(`Error: ${err.message}`, 'error');
     });
 
     this.bot.on('end', () => {
-      console.log('Bot disconnected. Attempting to reconnect...');
+      Logger.log('Disconnected. Attempting to reconnect...', 'warning');
       setTimeout(() => this.initialize(), 5000);
+    });
+
+    this.bot.on('death', () => {
+      Logger.log('Bot died! Respawning...', 'error');
+    });
+
+    this.bot.on('health', () => {
+      if (this.bot.health < 5) {
+        Logger.log(`Low health warning: ${this.bot.health}/20`, 'warning');
+      }
+    });
+
+    this.bot.on('playerLeft', (player) => {
+      if (this.bot.movementManager.followingPlayer?.username === player.username) {
+        this.bot.movementManager.stopFollowing();
+        Logger.log(`Stopped following ${player.username} (player left)`, 'movement');
+      }
     });
   }
 
   initializeModules() {
+    Logger.log('Initializing modules...', 'info');
     this.bot.combatManager = setupCombat(this.bot, this.config);
     this.bot.autoEatManager = setupAutoEat(this.bot, this.config);
     this.bot.antiAFKManager = setupAntiAFK(this.bot, this.config);
+    this.bot.movementManager = setupMovement(this.bot, this.config);
     this.bot.commandManager = setupCommands(this.bot);
+    Logger.log('All modules initialized successfully', 'success');
   }
 }
 
-module.exports = MinecraftBot;
+export default MinecraftBot;
