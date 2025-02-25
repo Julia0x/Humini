@@ -120,6 +120,22 @@ class CommandManager {
       }
     });
 
+    this.commands.set('mine', (args) => {
+      if (!this.bot.entity) {
+        Logger.log('Cannot start mining - bot not spawned yet', 'error');
+        return;
+      }
+
+      const subCommand = args[0]?.toLowerCase();
+      if (subCommand === 'start') {
+        this.bot.miningManager.startMining();
+      } else if (subCommand === 'stop') {
+        this.bot.miningManager.stopMining();
+      } else {
+        Logger.log('Usage: mine start|stop', 'warning');
+      }
+    });
+
     // Add custom commands from config
     if (this.bot.config.customCommands) {
       Object.entries(this.bot.config.customCommands).forEach(([cmd, message]) => {
@@ -152,7 +168,9 @@ class CommandManager {
         'follow stop': 'Stop following player',
         'inventory sort': 'Sort inventory items',
         'inventory clean': 'Clean junk from inventory',
-        'inventory dropall': 'Drop all items from inventory'
+        'inventory dropall': 'Drop all items from inventory',
+        'mine start': 'Start mining operation',
+        'mine stop': 'Stop mining operation'
       };
 
       // Add custom commands to help

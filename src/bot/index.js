@@ -7,6 +7,7 @@ import { setupAutoEat } from './eating.js';
 import { setupCommands } from './commands.js';
 import { setupAntiAFK } from './antiafk.js';
 import { setupMovement } from './movement.js';
+import { setupMining } from './mining.js';
 import Logger from '../utils/logger.js';
 import { usernameManager } from '../utils/username.js';
 
@@ -66,11 +67,19 @@ class MinecraftBot {
 
     this.bot.on('death', () => {
       Logger.log('Bot died! Respawning...', 'error');
+      if (this.bot.miningManager) {
+        this.bot.miningManager.stopMining();
+      }
     });
 
     this.bot.on('health', () => {
       if (this.bot.health < 5) {
         Logger.log(`Low health warning: ${this.bot.health}/20`, 'warning');
+        // Stop mining if health is low
+        if (this.bot.miningManager && this.bot.miningManager.isMining) {
+          this.bot.miningManager.stopMining();
+          Logger.log('Mining stopped due to low health', 'warning');
+        }
       }
     });
 
@@ -88,6 +97,7 @@ class MinecraftBot {
     this.bot.autoEatManager = setupAutoEat(this.bot, this.config);
     this.bot.antiAFKManager = setupAntiAFK(this.bot, this.config);
     this.bot.movementManager = setupMovement(this.bot, this.config);
+    this.bot.miningManager = setupMining(this.bot, this.config);
     this.bot.commandManager = setupCommands(this.bot);
     Logger.log('All modules initialized successfully', 'success');
   }
