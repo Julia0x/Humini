@@ -60,8 +60,46 @@ class MinecraftBot {
       Logger.log(`Error: ${err.message}`, 'error');
     });
 
-    this.bot.on('end', () => {
-      Logger.log('Disconnected. Attempting to reconnect...', 'warning');
+    this.bot.on('kicked', (reason, loggedIn) => {
+      const reasonJson = JSON.parse(reason);
+      const readableReason = reasonJson.text || reasonJson.translate || reason;
+      Logger.log(`Bot was kicked! Reason: ${readableReason}`, 'error');
+      Logger.log(`Login status: ${loggedIn ? 'Logged in' : 'Not logged in'}`, 'info');
+      setTimeout(() => this.initialize(), 5000);
+    });
+
+    this.bot.on('end', (reason) => {
+      let disconnectReason = 'Unknown reason';
+      
+      // Parse common disconnect reasons
+      if (typeof reason === 'string') {
+        disconnectReason = reason;
+      } else if (reason && typeof reason === 'object') {
+        if (reason.message) {
+          disconnectReason = reason.message;
+        } else if (reason.code) {
+          // Handle error codes
+          switch (reason.code) {
+            case 'ECONNREFUSED':
+              disconnectReason = 'Connection refused by server';
+              break;
+            case 'ETIMEDOUT':
+              disconnectReason = 'Connection timed out';
+              break;
+            case 'ECONNRESET':
+              disconnectReason = 'Connection reset by server';
+              break;
+            case 'EPIPE':
+              disconnectReason = 'Broken pipe - server closed connection';
+              break;
+            default:
+              disconnectReason = `Error code: ${reason.code}`;
+          }
+        }
+      }
+
+      Logger.log(`Disconnected: ${disconnectReason}`, 'error');
+      Logger.log('Attempting to reconnect in 5 seconds...', 'warning');
       setTimeout(() => this.initialize(), 5000);
     });
 
